@@ -6,7 +6,7 @@ from google.auth.transport.requests import Request
 from googleapiclient.http import MediaFileUpload
 
 SCOPES = ['https://www.googleapis.com/auth/drive.file']
-FOLDER_ID = '1DZVh2uxV6sgbzJMTDRHBTMDtt29iTSZI'
+FOLDER_ID = '1y7QRmbETlzL1cTBobyEdvxQBzpbZubcW'
 
 def get_drive_service():
     # Cargar token desde GitHub Secrets
