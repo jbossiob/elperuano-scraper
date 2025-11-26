@@ -1,10 +1,10 @@
 name: Run Scraper
 
 on:
+  workflow_dispatch: {}   # habilita botón Run workflow
   schedule:
-    - cron: "0 12 * * *"   # 7 AM Perú = 12:00 UTC
-  workflow_dispatch: {}
-  
+    - cron: "0 12 * * *"   # 7 AM Perú
+
 jobs:
   run:
     runs-on: ubuntu-latest
