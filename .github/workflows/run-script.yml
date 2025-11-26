@@ -1,50 +1,28 @@
-name: Run Scraper Daily
+name: Run Scraper
 
 on:
   schedule:
-    - cron: "0 12 * * *"  # → 7:00 am Perú (12:00 UTC)
-  workflow_dispatch:
-
+    - cron: "0 12 * * *"   # 7 AM Perú = 12:00 UTC
+  workflow_dispatch: {}
+  
 jobs:
-  run-script:
+  run:
     runs-on: ubuntu-latest
 
+    env:
+      GOOGLE_TOKEN: ${{ secrets.GOOGLE_TOKEN }}
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.10"
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
 
-    - name: Install Chrome
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y google-chrome-stable
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
-    - name: Install ChromeDriver
-      run: |
-        CHROME_VERSION=$(google-chrome --version | sed 's/Google Chrome //')
-        CHROME_DRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_${CHROME_VERSION%%.*}")
-        wget https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/${CHROME_DRIVER_VERSION}/linux64/chromedriver-linux64.zip
-        unzip chromedriver-linux64.zip
-        sudo mv chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
-        sudo chmod +x /usr/local/bin/chromedriver
-
-    - name: Install Python dependencies
-      run: pip install -r requirements.txt
-
-    - name: Create credentials.json
-      run: |
-        echo "$GOOGLE_CREDENTIALS" > credentials.json
-
-    - name: Run Scraper
-      run: python main.py
-
-    - name: Upload logs (optional)
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: logs
-        path: logs/
+      - name: Run scraper
+        run: python main.py
