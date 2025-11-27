@@ -1,28 +1,64 @@
 name: Run Scraper
-
 on:
-  workflow_dispatch: {}   # habilita botón Run workflow
+  workflow_dispatch: {}
   schedule:
-    - cron: "0 12 * * *"   # 7 AM Perú
-
+    - cron: "0 12 * * *"
 jobs:
   run:
     runs-on: ubuntu-latest
-
     env:
       GOOGLE_TOKEN: ${{ secrets.GOOGLE_CREDENTIALS }}
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
-
+      
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
-
+      
       - name: Install dependencies
         run: pip install -r requirements.txt
-
+      
       - name: Run scraper
         run: python main.py
+      
+      - name: Send success email
+        if: success()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.EMAIL_USER }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "Scraper ejecutado exitosamente"
+          body: |
+            El scraper de El Peruano se ejecuto correctamente.
+            
+            Fecha: ${{ github.event.repository.updated_at }}
+            Estado: Exito
+            Archivo subido a Google Drive
+            
+            Ver logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          to: ${{ secrets.NOTIFICATION_EMAIL }}
+          from: Scraper El Peruano
+      
+      - name: Send failure email
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.EMAIL_USER }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "ERROR en Scraper"
+          body: |
+            El scraper de El Peruano fallo
+            
+            Fecha: ${{ github.event.repository.updated_at }}
+            Estado: Error
+            
+            Revisa los logs aqui:
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          to: ${{ secrets.NOTIFICATION_EMAIL }}
+          from: Scraper El Peruano
