@@ -212,9 +212,8 @@ class ElPeruanoScraper:
         try:
             self.logger.info("Buscando primer cuadernillo completo...")
             
-            cuadernillo_btn = self.driver.find_element(
-                By.CSS_SELECTOR, 
-                "input[data-tipo='CuNl']"
+            cuadernillo_btn = WebDriverWait(self.driver, 30).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "input[data-tipo='CuNl']"))
             )
             
             pdf_url = cuadernillo_btn.get_attribute("data-url")
