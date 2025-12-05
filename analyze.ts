@@ -250,7 +250,7 @@ async function analyzeWithGemini(
 // Generación del PDF estilo SUNASS
 // -------------------------------
 
-function drawHeader(doc: PDFDocument, gazetteDate: string, fileName: string) {
+function drawHeader(doc: any, gazetteDate: string, fileName: string) {
   const { width } = doc.page;
 
   // Franja azul
@@ -278,7 +278,7 @@ function drawHeader(doc: PDFDocument, gazetteDate: string, fileName: string) {
   doc.moveDown(0.5);
 }
 
-function sectionTitle(doc: PDFDocument, title: string) {
+function sectionTitle(doc: any, title: string) {
   doc.moveDown(1);
   doc.fillColor(SUNASS_LIGHT_BLUE).fontSize(14).text(title);
   const y = doc.y + 2;
@@ -292,7 +292,7 @@ function sectionTitle(doc: PDFDocument, title: string) {
   doc.fillColor("black").fontSize(10);
 }
 
-function renderNorms(doc: PDFDocument, norms: Norm[]) {
+function renderNorms(doc: any, norms: Norm[]) {
   if (norms.length === 0) {
     doc.text("No se encontraron normas legales relevantes.");
     return;
