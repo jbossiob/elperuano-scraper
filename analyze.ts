@@ -95,7 +95,7 @@ async function extractPagesText(pdfPath: string) {
   const rawPages = data.text.split("\f");
 
   const pagesText = rawPages
-    .map((text, index) => ({
+    .map((text: string, index: number) => ({
       page: index + 1,
       text: text.trim(),
     }))
@@ -103,6 +103,7 @@ async function extractPagesText(pdfPath: string) {
 
   return pagesText;
 }
+  
 
 // -------------------------------
 // Llamada a Gemini
@@ -317,7 +318,7 @@ function renderNorms(doc: PDFDocument, norms: Norm[]) {
 }
 
 function renderAppointments(
-  doc: PDFDocument,
+  doc: any,
   title: string,
   items: Appointment[]
 ) {
@@ -363,7 +364,7 @@ function generateReportPdf(
     `analisis-el-peruano-${safeDate || "sin-fecha"}.pdf`
   );
 
-  const doc = new PDFDocument({ margin: 50, size: "A4" });
+  const doc: any = new PDFDocument({ margin: 50, size: "A4" });
   const stream = fs.createWriteStream(outPath);
   doc.pipe(stream);
 
