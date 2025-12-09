@@ -119,7 +119,8 @@ async function analyzeWithGemini(
 
   const ai = new GoogleGenAI({ apiKey });
 
-  const model = "gemini-2.5-pro";
+  const model = "gemini-1.5-flash";
+
 
   const formattedText = pagesText
     .map(
