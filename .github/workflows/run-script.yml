@@ -3,7 +3,7 @@ name: Run Scraper
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: "0 11 * * *"  # todos los días 11:00 UTC (ajusta si quieres)
+    - cron: "0 11 * * *"  # todos los días 11:00 UTC
 
 jobs:
   run:
@@ -23,8 +23,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run scraper (download + upload to Drive)
-        env:
-          GDRIVE_SA_JSON: ${{ secrets.GDRIVE_SA_JSON }}
-          DRIVE_FOLDER_ID: ${{ secrets.DRIVE_FOLDER_ID }}
+      - name: Run scraper (download only)
         run: python main.py
+
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: elperuano-pdf
+          path: downloads/*.pdf
+          if-no-files-found: error
