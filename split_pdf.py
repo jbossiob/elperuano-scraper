@@ -1,9 +1,12 @@
 from pathlib import Path
 from PyPDF2 import PdfReader, PdfWriter
+import os
 
 IN_DIR = Path("downloads")
 OUT_DIR = Path("downloads/chunks")
-PAGES_PER_CHUNK = 25  # ajusta: 20/25 suele ir bien
+
+# Permite configurar desde GitHub Actions
+PAGES_PER_CHUNK = int(os.getenv("PAGES_PER_CHUNK", 25))
 
 def split_pdf(pdf_path: Path):
     reader = PdfReader(str(pdf_path))
@@ -20,6 +23,7 @@ def split_pdf(pdf_path: Path):
         out = OUT_DIR / f"{base}_p{start+1:03d}-{end:03d}.pdf"
         with open(out, "wb") as f:
             writer.write(f)
+
         print(f"Created: {out}")
 
 def main():
