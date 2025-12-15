@@ -1,39 +1,31 @@
-from datetime import datetime
-from pathlib import Path
 from src import ElPeruanoScraper, Config, setup_logger
-from src.upload_drive import upload_to_drive
 
 def main():
     logger = setup_logger(log_level=10)
     logger.info("Starting El Peruano Scraper")
-    
-    downloaded_file = None
-    
+
     try:
         config = Config()
-        
+
         scraper = ElPeruanoScraper(
             config,
-            browser='auto'
+            browser="auto"
         )
-        
-        # Descargar y SUBIR a Drive
+
+        # ✅ Solo descargar (sin subir, sin borrar)
         downloaded_file = scraper.download_bulletin(
-            date=None,  # Usa fecha actual de Perú
-            delete_after_upload=True,  # ← el PDF se borra localmente luego de subir
-            upload_callback=upload_to_drive  # ← función que sube a tu Drive
+            date=None,                 # usa fecha actual de Perú
+            delete_after_upload=False, # NO borrar el PDF
+            upload_callback=None       # NO subir a ningún lado
         )
-        
+
         if downloaded_file:
-            logger.info("✓ Download completed successfully!")
-            logger.info("✓ Upload and cleanup completed!")
+            logger.info(f"✓ Download completed successfully: {downloaded_file}")
         else:
             logger.error("✗ Download failed")
-            return
-            
+
     except Exception as e:
         logger.error(f"Unexpected error: {e}", exc_info=True)
-        return
 
 if __name__ == "__main__":
     main()
