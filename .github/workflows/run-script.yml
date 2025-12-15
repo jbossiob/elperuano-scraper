@@ -26,9 +26,19 @@ jobs:
       - name: Run scraper (download only)
         run: python main.py
 
-      - name: Upload PDF artifact
-        uses: actions/upload-artifact@v4
+      - name: Send PDF by email (Gmail SMTP)
+        uses: dawidd6/action-send-mail@v4
         with:
-          name: elperuano-pdf
-          path: downloads/*.pdf
-          if-no-files-found: error
+          server_address: smtp.gmail.com
+          server_port: 587
+          secure: false
+          username: ${{ secrets.SMTP_USER }}
+          password: ${{ secrets.SMTP_PASS }}
+          subject: "[ELPERUANO] Cuadernillo del día"
+          to: ${{ secrets.MAIL_TO }}
+          from: "El Peruano Bot <${{ secrets.SMTP_USER }}>"
+          body: |
+            Se adjunta el cuadernillo de normas de El Peruano descargado automáticamente.
+            
+            Este correo puede usarse como disparador para análisis en Copilot Studio.
+          attachments: downloads/*.pdf
