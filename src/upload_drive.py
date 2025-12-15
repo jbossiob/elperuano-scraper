@@ -1,52 +1,61 @@
-import json
+# src/upload_drive.py
 import os
-from google.oauth2.credentials import Credentials
+import json
+from pathlib import Path
+from typing import Optional
+
+from google.oauth2 import service_account
 from googleapiclient.discovery import build
-from google.auth.transport.requests import Request
 from googleapiclient.http import MediaFileUpload
 
-SCOPES = ['https://www.googleapis.com/auth/drive.file']
-FOLDER_ID = '1y7QRmbETlzL1cTBobyEdvxQBzpbZubcW'
 
-def get_drive_service():
-    # Cargar token desde GitHub Secrets
-    token_data = os.getenv("GOOGLE_TOKEN")
-    
-    if not token_data:
-        raise Exception("GOOGLE_TOKEN no está configurado como secret en GitHub.")
-
-    creds_dict = json.loads(token_data)
-    creds = Credentials.from_authorized_user_info(creds_dict, SCOPES)
-
-    # Refrescar token automáticamente
-    if creds.expired and creds.refresh_token:
-        creds.refresh(Request())
-
-    return build('drive', 'v3', credentials=creds)
+SCOPES = ["https://www.googleapis.com/auth/drive"]
 
 
-def upload_to_drive(file_path):
-    if not os.path.exists(file_path):
-        print(f"✗ El archivo no existe: {file_path}")
-        return None
-    
-    service = get_drive_service()
-    file_name = os.path.basename(file_path)
+def _get_drive_service():
+    sa_json = os.environ.get("GDRIVE_SA_JSON")
+    if not sa_json:
+        raise RuntimeError("Falta la variable de entorno GDRIVE_SA_JSON (GitHub Secret).")
+
+    try:
+        sa_info = json.loads(sa_json)
+    except json.JSONDecodeError as e:
+        raise RuntimeError("GDRIVE_SA_JSON no es JSON válido. Revisa el Secret en GitHub.") from e
+
+    creds = service_account.Credentials.from_service_account_info(sa_info, scopes=SCOPES)
+    return build("drive", "v3", credentials=creds)
+
+
+def upload_to_drive(file_path: str | Path, folder_id: Optional[str] = None) -> str:
+    """
+    Sube un archivo a Google Drive usando Service Account.
+    Retorna el fileId de Drive.
+    """
+    path = Path(file_path)
+    if not path.exists():
+        raise FileNotFoundError(f"No existe el archivo: {path}")
+
+    folder_id = folder_id or os.environ.get("DRIVE_FOLDER_ID")
+    if not folder_id:
+        raise RuntimeError("Falta DRIVE_FOLDER_ID (GitHub Secret) o folder_id como argumento.")
+
+    drive = _get_drive_service()
 
     file_metadata = {
-        'name': file_name,
-        'parents': [FOLDER_ID]
+        "name": path.name,
+        "parents": [folder_id],
     }
 
-    media = MediaFileUpload(file_path, resumable=True)
+    media = MediaFileUpload(
+        str(path),
+        mimetype="application/pdf",
+        resumable=True
+    )
 
-    file = service.files().create(
+    created = drive.files().create(
         body=file_metadata,
         media_body=media,
-        fields='id, webViewLink'
+        fields="id, name, parents"
     ).execute()
 
-    print(f"✓ Subido: {file_name}")
-    print(f"🔗 Link: {file.get('webViewLink')}")
-
-    return file.get("id")
+    return created["id"]
