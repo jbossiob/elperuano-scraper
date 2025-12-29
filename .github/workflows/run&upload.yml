@@ -26,12 +26,6 @@ jobs:
       - name: Run scraper (download only)
         run: python main.py
 
-      - name: Write service account key to file
-        env:
-          GDRIVE_SA_KEY: ${{ secrets.GDRIVE_SA_KEY }}
-        run: |
-          echo "$GDRIVE_SA_KEY" > sa.json
-
       - name: Upload latest full PDF to Google Drive
         env:
           GDRIVE_SA_KEY: ${{ secrets.GDRIVE_SA_KEY }}
