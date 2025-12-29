@@ -1,9 +1,9 @@
-name: Run Scraper + Upload to Drive
+name: Run Scraper + Upload to Drive (OAuth)
 
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: "0 11 * * *"  # todos los días 11:00 UTC
+    - cron: "0 11 * * *"  # 6:00 a.m. Perú (UTC-5) = 11:00 UTC
 
 jobs:
   run:
@@ -16,7 +16,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.11"
 
       - name: Install Python dependencies
         run: |
@@ -26,12 +26,17 @@ jobs:
       - name: Run scraper (download only)
         run: python main.py
 
+      - name: Write OAuth token to file
+        env:
+          GDRIVE_TOKEN_B64: ${{ secrets.GDRIVE_TOKEN_B64 }}
+        run: |
+          echo "$GDRIVE_TOKEN_B64" | base64 -d > token.json
+
       - name: Upload latest full PDF to Google Drive
         env:
-          GDRIVE_SA_KEY: ${{ secrets.GDRIVE_SA_KEY }}
           GDRIVE_FOLDER_ID: 1y7QRmbETlzL1cTBobyEdvxQBzpbZubcW
         run: python upload_latest.py
 
-      - name: Cleanup key
+      - name: Cleanup token
         if: always()
-        run: rm -f sa.json
+        run: rm -f token.json
