@@ -5,3 +5,4 @@ google-auth-oauthlib
 selenium
 PyPDF2
 requests
+python-dotenv
