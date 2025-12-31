@@ -1,22 +1,23 @@
 from pathlib import Path
 from PyPDF2 import PdfReader, PdfWriter
-import os
+from typing import List
 
-IN_DIR = Path("downloads")
 OUT_DIR = Path("downloads/chunks")
+PAGES_PER_CHUNK = 25
 
-# Permite configurar desde GitHub Actions
-PAGES_PER_CHUNK = int(os.getenv("PAGES_PER_CHUNK", 25))
 
-def split_pdf(pdf_path: Path):
+def split_pdf(pdf_path: Path) -> List[Path]:
     reader = PdfReader(str(pdf_path))
     total = len(reader.pages)
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 
+    created_files: List[Path] = []
     base = pdf_path.stem
+
     for start in range(0, total, PAGES_PER_CHUNK):
         writer = PdfWriter()
         end = min(start + PAGES_PER_CHUNK, total)
+
         for i in range(start, end):
             writer.add_page(reader.pages[i])
 
@@ -24,13 +25,7 @@ def split_pdf(pdf_path: Path):
         with open(out, "wb") as f:
             writer.write(f)
 
+        created_files.append(out)
         print(f"Created: {out}")
 
-def main():
-    pdfs = sorted(IN_DIR.glob("*.pdf"))
-    if not pdfs:
-        raise SystemExit("No PDFs found in downloads/")
-    split_pdf(pdfs[-1])
-
-if __name__ == "__main__":
-    main()
+    return created_files
