@@ -1,4 +1,7 @@
 from src import ElPeruanoScraper, Config, setup_logger, upload_pdf_to_drive
+from dotenv import load_dotenv
+load_dotenv()
+
 
 def main():
     logger = setup_logger(log_level=10)

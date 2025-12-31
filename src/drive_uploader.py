@@ -7,41 +7,35 @@ from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 
-SCOPES = ["https://www.googleapis.com/auth/drive.file"]
-
 
 def get_drive_service():
     """
-    Crea un cliente de Google Drive usando OAuth de usuario (refresh token).
-    Variables requeridas:
-    - GOOGLE_CLIENT_ID
-    - GOOGLE_CLIENT_SECRET
-    - GOOGLE_REFRESH_TOKEN
+    Crea cliente de Google Drive usando OAuth de usuario
+    (refresh token generado en TanIA).
     """
-    creds = Credentials(
-        token=None,
-        refresh_token=os.environ.get("GOOGLE_REFRESH_TOKEN"),
-        token_uri="https://oauth2.googleapis.com/token",
-        client_id=os.environ.get("GOOGLE_CLIENT_ID"),
-        client_secret=os.environ.get("GOOGLE_CLIENT_SECRET"),
-        scopes=SCOPES,
-    )
 
-    if not creds.refresh_token:
-        raise RuntimeError("Falta GOOGLE_REFRESH_TOKEN")
+    user_info = {
+        "client_id": os.environ.get("GOOGLE_CLIENT_ID"),
+        "client_secret": os.environ.get("GOOGLE_CLIENT_SECRET"),
+        "refresh_token": os.environ.get("GOOGLE_REFRESH_TOKEN"),
+        "token_uri": "https://oauth2.googleapis.com/token",
+    }
 
+    if not all(user_info.values()):
+        raise RuntimeError("Faltan variables GOOGLE_CLIENT_ID / SECRET / REFRESH_TOKEN")
+
+    creds = Credentials.from_authorized_user_info(user_info)
+
+    # Fuerza refresh del access token
     creds.refresh(Request())
+
     return build("drive", "v3", credentials=creds)
 
 
 def upload_pdf_to_drive(
     file_path: str | Path,
     folder_id: Optional[str] = None
-) -> dict:
-    """
-    Sube un PDF a Google Drive usando OAuth usuario.
-    Retorna metadata del archivo creado.
-    """
+):
     path = Path(file_path)
     if not path.exists():
         raise FileNotFoundError(f"No existe el archivo: {path}")
