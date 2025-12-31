@@ -1,5 +1,6 @@
 from .scraper import ElPeruanoScraper
 from .config import Config
+from .drive_uploader import upload_pdf_to_drive
 from .logger import setup_logger
 from .exceptions import (
     ScraperError,
@@ -14,6 +15,7 @@ __all__ = [
     "setup_logger",
     "ScraperError",
     "ElementNotFoundError",
+    "upload_pdf_to_drive",
     "DownloadError",
     "ConfigurationError",
 ]

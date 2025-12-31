@@ -1,9 +1,9 @@
-name: Run Scraper + Upload to Drive (OAuth)
+name: Run El Peruano Scraper + Upload to Drive (OAuth)
 
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: "0 11 * * *"  # 6:00 a.m. Perú (UTC-5) = 11:00 UTC
+    - cron: "0 11 * * *"  # 6:00 a.m. Perú (UTC-5)
 
 jobs:
   run:
@@ -23,23 +23,19 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Install Chrome
+      - name: Install Chrome (for Selenium)
         uses: browser-actions/setup-chrome@v1
 
-      - name: Run scraper (download only)
+      - name: Run scraper + upload to Drive
+        env:
+          # GOOGLE OAUTH (same model as TanIA)
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+
+          # DRIVE
+          GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
+
+          # SCRAPER
+          HEADLESS: "true"
         run: python main.py
-
-      - name: Write OAuth token to file
-        env:
-          GDRIVE_TOKEN_B64: ${{ secrets.GDRIVE_TOKEN_B64 }}
-        run: |
-          echo "$GDRIVE_TOKEN_B64" | base64 -d > token.json
-
-      - name: Upload latest full PDF to Google Drive
-        env:
-          GDRIVE_FOLDER_ID: 1y7QRmbETlzL1cTBobyEdvxQBzpbZubcW
-        run: python upload_latest.py
-
-      - name: Cleanup token
-        if: always()
-        run: rm -f token.json

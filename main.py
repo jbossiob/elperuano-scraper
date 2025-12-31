@@ -1,4 +1,4 @@
-from src import ElPeruanoScraper, Config, setup_logger
+from src import ElPeruanoScraper, Config, setup_logger, upload_pdf_to_drive
 
 def main():
     logger = setup_logger(log_level=10)
@@ -12,17 +12,16 @@ def main():
             browser="auto"
         )
 
-        # ✅ Solo descargar (sin subir, sin borrar)
         downloaded_file = scraper.download_bulletin(
-            date=None,                 # usa fecha actual de Perú
-            delete_after_upload=False, # NO borrar el PDF
-            upload_callback=None       # NO subir a ningún lado
+            date=None,
+            delete_after_upload=True,
+            upload_callback=upload_pdf_to_drive
         )
 
         if downloaded_file:
-            logger.info(f"✓ Download completed successfully: {downloaded_file}")
+            logger.info(f"Pipeline completed successfully: {downloaded_file}")
         else:
-            logger.error("✗ Download failed")
+            logger.error("Pipeline failed")
 
     except Exception as e:
         logger.error(f"Unexpected error: {e}", exc_info=True)
