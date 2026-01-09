@@ -261,6 +261,27 @@ class ElPeruanoScraper:
             self.logger.error(f"Error al borrar archivo: {e}")
             return False
     
+    def get_rendered_normas_html(self) -> str:
+        """
+        Devuelve el HTML renderizado de la página de Normas
+        (con JavaScript ejecutado).
+        """
+        try:
+            self.logger.info("Obteniendo HTML renderizado de Normas...")
+
+            if not self.driver:
+                self.logger.info("Inicializando navegador para HTML renderizado...")
+                self.driver = self._setup_driver()
+                self.driver.get("https://diariooficial.elperuano.pe/Normas")
+                time.sleep(5)
+
+            return self.driver.page_source
+
+        except Exception as e:
+            self.logger.error(f"Error obteniendo HTML renderizado: {e}")
+            raise
+
+
     def download_bulletin(self, date: str = None, delete_after_upload: bool = False, 
                          upload_callback=None) -> str:
 

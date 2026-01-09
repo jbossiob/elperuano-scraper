@@ -4,6 +4,7 @@ load_dotenv()
 from pathlib import Path
 from src import ElPeruanoScraper, Config, setup_logger, upload_pdf_to_drive
 from split_pdf import split_pdf
+from src.index_scraper import scrape_normas_index
 
 
 def main():
@@ -28,6 +29,10 @@ def main():
             logger.error("Download failed")
             return
 
+        index_file = scrape_normas_index()
+        logger.info(f"Uploading index file {index_file.name} to Drive...")
+        upload_pdf_to_drive(index_file)
+
         logger.info("Splitting PDF into chunks...")
         chunks = split_pdf(Path(pdf_path))
 
@@ -36,6 +41,7 @@ def main():
         for chunk in chunks:
             logger.info(f"Uploading {chunk.name} to Drive...")
             upload_pdf_to_drive(chunk)
+
 
         logger.info("✓ All chunks uploaded successfully")
 
